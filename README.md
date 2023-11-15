@@ -1,5 +1,5 @@
 <h2 align="center">Hi my name is Rahmatillo and I'm Full-Stack developer</h2>
-<h2 align="left">Here is my social accounts: &nbsp; &nbsp; &nbsp;
+<h2 align="center">Here is my social accounts: &nbsp; &nbsp; &nbsp;
 <a href="https://youtube.com/rahmatillokh">Youtube</a> &nbsp;&nbsp;
 <a href="https://instagram/rahmatilla.off">Instagram</a>&nbsp;&nbsp;
 <a href="https://t.me/onlaymiz">Telegram</a>&nbsp;&nbsp;
