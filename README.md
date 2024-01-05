@@ -1,5 +1,5 @@
 <div>
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/GNOME_Terminal_icon_2019.svg/1200px-GNOME_Terminal_icon_2019.svg.png" max-width="100%" alt="hello"/>
+    <img width=100, height=100 src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/GNOME_Terminal_icon_2019.svg/1200px-GNOME_Terminal_icon_2019.svg.png" max-width="100%" alt="hello"/>
 </div>
 
 ```
