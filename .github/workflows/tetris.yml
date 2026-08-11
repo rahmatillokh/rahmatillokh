@@ -1,0 +1,50 @@
+name: Contribution Tetris
+
+on:
+  schedule:
+    # every day at 03:00 UTC (08:00 Tashkent)
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "Render a specific year instead of the last 12 months (e.g. 2023)"
+        required: false
+        default: ""
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate tetris SVGs
+        env:
+          YEAR: ${{ github.event.inputs.year }}
+        run: |
+          if [ -n "$YEAR" ]; then
+            node scripts/generate-tetris.mjs "${{ github.repository_owner }}" assets --year="$YEAR"
+          else
+            node scripts/generate-tetris.mjs "${{ github.repository_owner }}" assets
+          fi
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/tetris.svg assets/tetris-dark.svg
+          if git diff --staged --quiet; then
+            echo "no changes"
+          else
+            git commit -m "chore: refresh contribution tetris"
+            git push
+          fi
