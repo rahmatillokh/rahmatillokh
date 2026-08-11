@@ -439,7 +439,9 @@ function render({ pieces, weeks, start, theme, period }) {
   const total = Math.min(40, Math.max(14, N * 0.13 + 6)); // seconds
   const DROP_END = 86; // % of the loop by which every piece has landed
   const stagger = N > 1 ? DROP_END / N : 0;
-  const fall = Math.min(9, Math.max(1.6, stagger * 5));
+  // how long one piece spends falling, as a share of the loop — kept short so
+  // the drop reads as gravity rather than a drift
+  const fall = Math.min(5, Math.max(1.2, stagger * 3));
 
   const css = [];
   const body = [];
