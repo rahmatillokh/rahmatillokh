@@ -110,25 +110,50 @@ async function listRepos(user) {
   return all.filter((r) => !r.fork && !r.archived && !EXCLUDE.has(r.name.toLowerCase()));
 }
 
-// /stats/commit_activity → 52 weeks × 7 daily commit counts, per repo
-async function repoActivity(user, repo) {
-  for (let attempt = 0; attempt < 6; attempt++) {
-    const res = await api(`/repos/${user}/${repo}/stats/commit_activity`);
-    if (res.status === 202) {
-      // GitHub is computing the stats — back off and ask again
-      await sleep(2000 + attempt * 1000);
-      continue;
-    }
-    if (res.status === 204) return []; // empty repo
+// identities that count as "mine" when a repo has several committers
+const IDENTS = [login.toLowerCase(), ...(flags.authors || '').split(',').map((s) => s.trim().toLowerCase())]
+  .filter((s) => s.length >= 4);
+
+function isMine(c) {
+  if (c.login && IDENTS.includes(c.login)) return true;
+  const haystack = `${c.email} ${c.name}`.toLowerCase();
+  return IDENTS.some((id) => haystack.includes(id));
+}
+
+// full commit history for one repo (paginated, newest first)
+async function repoCommits(user, repo) {
+  const raw = [];
+  const authors = new Set();
+
+  for (let page = 1; page <= 6; page++) {
+    const res = await api(`/repos/${user}/${repo}/commits?per_page=100&page=${page}`);
+    if (res.status === 409) return []; // empty repo
     if (!res.ok) {
       console.warn(`  ${repo}: HTTP ${res.status}`);
       return [];
     }
-    const weeks = await res.json();
-    return Array.isArray(weeks) ? weeks : [];
+    const batch = await res.json();
+    if (!Array.isArray(batch) || !batch.length) break;
+
+    for (const c of batch) {
+      const entry = {
+        date: (c.commit?.author?.date || c.commit?.committer?.date || '').slice(0, 10),
+        login: c.author?.login?.toLowerCase() || '',
+        email: c.commit?.author?.email || '',
+        name: c.commit?.author?.name || '',
+      };
+      if (entry.date) raw.push(entry);
+      authors.add(entry.login || entry.email.toLowerCase());
+    }
+
+    if (batch.length < 100) break;
+    // clearly a shared / upstream history — stop paging, we filter below anyway
+    if (page >= 2 && authors.size > 5) break;
   }
-  console.warn(`  ${repo}: stats still computing, skipped`);
-  return [];
+
+  // solo repo → every commit is the owner's, whatever email git was configured with
+  const solo = authors.size <= 3;
+  return raw.filter((c) => solo || isMine(c)).map((c) => c.date);
 }
 
 async function fetchActivity(user) {
@@ -136,39 +161,62 @@ async function fetchActivity(user) {
   console.log(`scanning ${repos.length} repositories…`);
 
   const daily = new Map();
-  let totalCommits = 0;
+  let total = 0;
 
   for (const r of repos) {
-    const weeks = await repoActivity(user, r.name);
-    let repoTotal = 0;
-    for (const w of weeks) {
-      if (!Array.isArray(w?.days)) continue;
-      w.days.forEach((count, i) => {
-        if (!count) return;
-        const day = new Date((w.week + i * 86400) * 1000).toISOString().slice(0, 10);
-        daily.set(day, (daily.get(day) || 0) + count);
-        repoTotal += count;
-      });
-    }
-    if (repoTotal) console.log(`  ${r.name}: ${repoTotal}`);
-    totalCommits += repoTotal;
+    const dates = await repoCommits(user, r.name);
+    for (const d of dates) daily.set(d, (daily.get(d) || 0) + 1);
+    if (dates.length) console.log(`  ${r.name}: ${dates.length}`);
+    total += dates.length;
   }
 
-  console.log(`${totalCommits} commits across ${daily.size} active days`);
+  console.log(`${total} commits across ${daily.size} active days`);
   return daily;
 }
 
+const DAY_MS = 86400000;
+const WINDOW_DAYS = 371; // 53 weeks
+const MIN_RECENT_DAYS = 20; // below this the last year is considered too empty
+
+// pick the window end: the last 12 months if they hold enough activity,
+// otherwise the busiest 53-week stretch in the whole history
+function pickWindowEnd(daily) {
+  const active = [...daily.entries()]
+    .filter(([, n]) => n > 0)
+    .map(([d]) => Date.parse(`${d}T00:00:00Z`))
+    .sort((a, b) => a - b);
+
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  if (!active.length) return { end: today, auto: false };
+
+  const countUpTo = (endMs) =>
+    active.filter((t) => t <= endMs && t > endMs - WINDOW_DAYS * DAY_MS).length;
+
+  const recent = countUpTo(today.getTime());
+  if (recent >= MIN_RECENT_DAYS) return { end: today, auto: false };
+
+  let bestEnd = today.getTime();
+  let bestCount = recent;
+  for (const t of active) {
+    const n = countUpTo(t);
+    if (n > bestCount) {
+      bestCount = n;
+      bestEnd = t;
+    }
+  }
+  return { end: new Date(bestEnd), auto: bestEnd !== today.getTime() };
+}
+
 // daily commit counts → one cell per day, level 0-4 by quartile
-function toCells(daily) {
+function toCells(daily, end) {
   const counts = [...daily.values()].filter((c) => c > 0).sort((a, b) => a - b);
   const at = (p) => counts[Math.min(counts.length - 1, Math.floor(counts.length * p))] || 1;
   const [t1, t2, t3] = [at(0.25), at(0.5), at(0.75)];
   const levelOf = (c) => (c <= 0 ? 0 : c <= t1 ? 1 : c <= t2 ? 2 : c <= t3 ? 3 : 4);
 
-  const end = new Date();
-  end.setUTCHours(0, 0, 0, 0);
   const start = new Date(end);
-  start.setUTCDate(start.getUTCDate() - 364);
+  start.setUTCDate(start.getUTCDate() - (WINDOW_DAYS - 7));
   start.setUTCDate(start.getUTCDate() - start.getUTCDay()); // back up to Sunday
 
   const cells = [];
@@ -320,7 +368,7 @@ function monthLabels(start, weeks) {
   return out;
 }
 
-function render({ pieces, weeks, start, theme }) {
+function render({ pieces, weeks, start, theme, period }) {
   const t = THEMES[theme];
   const W = PAD_X * 2 + weeks * PITCH - GAP;
   const H = TOP + 7 * PITCH - GAP + BOTTOM;
@@ -406,7 +454,7 @@ function render({ pieces, weeks, start, theme }) {
   });
 
   body.push(
-    `<text class="cap" x="${PAD_X - 5}" y="${H - 10}">activity tetris · @${login}</text>`,
+    `<text class="cap" x="${PAD_X - 5}" y="${H - 10}">activity tetris · @${login} · ${period}</text>`,
     `<text class="cap" x="${W - PAD_X + 5}" y="${H - 10}" text-anchor="end">${N} pieces</text>`
   );
 
@@ -420,7 +468,8 @@ function render({ pieces, weeks, start, theme }) {
 
 /* ── main ───────────────────────────────────────────────────────────────── */
 const daily = await fetchActivity(login);
-const cells = toCells(daily);
+const { end, auto } = pickWindowEnd(daily);
+const cells = toCells(daily, end);
 const { grid, weeks, start } = buildGrid(cells);
 const pieces = tile(grid, weeks);
 
@@ -430,9 +479,17 @@ if (!filled) {
   process.exit(1);
 }
 
+const fmt = (d) => `${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+const period = `${fmt(start)} – ${fmt(end)}`;
+console.log(
+  auto
+    ? `last 12 months were too quiet — showing the busiest window: ${period}`
+    : `window: ${period}`
+);
+
 mkdirSync(outDir, { recursive: true });
 for (const theme of ['light', 'dark']) {
-  const svg = render({ pieces, weeks, start, theme });
+  const svg = render({ pieces, weeks, start, theme, period });
   const file = `${outDir}/tetris${theme === 'dark' ? '-dark' : ''}.svg`;
   writeFileSync(file, svg);
   console.log(`${file}  ${(svg.length / 1024).toFixed(1)} KB`);
