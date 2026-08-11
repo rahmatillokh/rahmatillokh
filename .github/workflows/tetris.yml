@@ -26,12 +26,9 @@ jobs:
         env:
           # lifts the API rate limit from 60 to 1000 requests/hour
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # exclude this repo: the daily bot commit below would otherwise show up
-        # as fake activity on every single day
-        run: >
-          node scripts/generate-tetris.mjs
-          "${{ github.repository_owner }}" assets
-          --exclude="${{ github.event.repository.name }}"
+        # the profile repo stays in scope — the nightly bot commit is dropped by
+        # author, so real README work here still counts as activity
+        run: node scripts/generate-tetris.mjs "${{ github.repository_owner }}" assets
 
       - name: Commit if changed
         run: |

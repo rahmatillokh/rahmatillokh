@@ -110,9 +110,33 @@ async function listRepos(user) {
   return all.filter((r) => !r.fork && !r.archived && !EXCLUDE.has(r.name.toLowerCase()));
 }
 
-// identities that count as "mine" when a repo has several committers
-const IDENTS = [login.toLowerCase(), ...(flags.authors || '').split(',').map((s) => s.trim().toLowerCase())]
-  .filter((s) => s.length >= 4);
+// identities that count as "mine" when a repo has many committers.
+// Seeded from the login, the account's display name and any --authors values,
+// because commits made from a machine with an unlinked git email carry neither
+// a GitHub login nor a recognisable address.
+const IDENTS = [];
+
+// Above this many distinct committers a repo reads as a shared/upstream
+// history rather than a personal project.
+const PERSONAL_AUTHORS = 8;
+
+async function loadIdentities(user) {
+  const tokens = [user, ...(flags.authors || '').split(',')];
+  const res = await api(`/users/${encodeURIComponent(user)}`);
+  if (res.ok) {
+    const profile = await res.json();
+    if (profile.name) tokens.push(...String(profile.name).split(/\s+/));
+    if (profile.email) tokens.push(profile.email);
+  }
+  for (const t of tokens) {
+    const v = t.trim().toLowerCase();
+    if (v.length >= 4 && !IDENTS.includes(v)) IDENTS.push(v);
+  }
+  console.log(`identities: ${IDENTS.join(', ')}`);
+}
+
+const isBot = (c) =>
+  /\[bot\]$/.test(c.login) || /\[bot\]|github-actions|dependabot/i.test(`${c.name} ${c.email}`);
 
 function isMine(c) {
   if (c.login && IDENTS.includes(c.login)) return true;
@@ -142,21 +166,27 @@ async function repoCommits(user, repo) {
         email: c.commit?.author?.email || '',
         name: c.commit?.author?.name || '',
       };
-      if (entry.date) raw.push(entry);
+      if (!entry.date || isBot(entry)) continue; // the nightly bot commit is not activity
+      raw.push(entry);
       authors.add(entry.login || entry.email.toLowerCase());
     }
 
     if (batch.length < 100) break;
     // clearly a shared / upstream history — stop paging, we filter below anyway
-    if (page >= 2 && authors.size > 5) break;
+    if (page >= 2 && authors.size > PERSONAL_AUTHORS) break;
   }
 
-  // solo repo → every commit is the owner's, whatever email git was configured with
-  const solo = authors.size <= 3;
-  return raw.filter((c) => solo || isMine(c)).map((c) => c.date);
+  // A personal project is the owner's work even when git was configured with a
+  // different email on every machine — an unlinked email shows up as its own
+  // identity, so a solo repo can still carry a handful of them. Only a
+  // many-handed history (an upstream clone) is filtered down to attributable
+  // commits. This must not depend on how many pages were fetched.
+  const personal = authors.size <= PERSONAL_AUTHORS;
+  return raw.filter((c) => personal || isMine(c)).map((c) => c.date);
 }
 
 async function fetchActivity(user) {
+  await loadIdentities(user);
   const repos = await listRepos(user);
   console.log(`scanning ${repos.length} repositories…`);
 
