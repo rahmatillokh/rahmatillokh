@@ -116,24 +116,6 @@ $ uptime
   <sub>🧱 Har kuni yangilanadi — commitlarim tetromino bo'laklariga bo'linib, grafikni qaytadan yig'adi</sub>
 </div>
 
-<!-- ═══════════════════════════ PROJECTS ═══════════════════════════ -->
-## 🚀 Featured Projects
-
-<div align="center">
-
-| Loyiha | Tavsif | Stack |
-| :--- | :--- | :--- |
-| **[youtube-downloader-app](https://github.com/rahmatillokh/youtube-downloader-app)**<br/>[![stars](https://img.shields.io/github/stars/rahmatillokh/youtube-downloader-app?style=flat-square&color=FFD700&label=%E2%98%85)](https://github.com/rahmatillokh/youtube-downloader-app/stargazers) | YouTube'dan audio yoki video yuklab oluvchi ilova | ![](https://img.shields.io/badge/JS-323330?style=flat-square&logo=javascript&logoColor=F7DF1E) ![](https://img.shields.io/badge/Node-6DA55F?style=flat-square&logo=node.js&logoColor=white) |
-| **[messenger-clone](https://github.com/rahmatillokh/messenger-clone)**<br/>[![stars](https://img.shields.io/github/stars/rahmatillokh/messenger-clone?style=flat-square&color=FFD700&label=%E2%98%85)](https://github.com/rahmatillokh/messenger-clone/stargazers) | Messenger ilovasining real-time kloni | ![](https://img.shields.io/badge/TS-007ACC?style=flat-square&logo=typescript&logoColor=white) ![](https://img.shields.io/badge/Next-000?style=flat-square&logo=next.js&logoColor=white) |
-| **[telegram-web-app](https://github.com/rahmatillokh/telegram-web-app)**<br/>[![stars](https://img.shields.io/github/stars/rahmatillokh/telegram-web-app?style=flat-square&color=FFD700&label=%E2%98%85)](https://github.com/rahmatillokh/telegram-web-app/stargazers) | Telegram bot bilan ishlaydigan Web App | ![](https://img.shields.io/badge/JS-323330?style=flat-square&logo=javascript&logoColor=F7DF1E) ![](https://img.shields.io/badge/Telegram-26A5E4?style=flat-square&logo=telegram&logoColor=white) |
-| **[instagram-downloader-bot](https://github.com/rahmatillokh/instagram-downloader-bot)**<br/>[![stars](https://img.shields.io/github/stars/rahmatillokh/instagram-downloader-bot?style=flat-square&color=FFD700&label=%E2%98%85)](https://github.com/rahmatillokh/instagram-downloader-bot/stargazers) | Instagram'dan video yuklab beruvchi bot | ![](https://img.shields.io/badge/JS-323330?style=flat-square&logo=javascript&logoColor=F7DF1E) ![](https://img.shields.io/badge/Node-6DA55F?style=flat-square&logo=node.js&logoColor=white) |
-
-</div>
-
-<div align="center">
-  <a href="https://github.com/rahmatillokh?tab=repositories"><b>→ Barcha repolar</b></a>
-</div>
-
 <!-- ═══════════════════════════ QUOTE ═══════════════════════════ -->
 <div align="center">
   <img src="https://quotes-github-readme.vercel.app/api?type=horizontal&theme=tokyonight" alt="quote" />
