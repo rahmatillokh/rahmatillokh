@@ -226,7 +226,8 @@ async function fetchActivity(user) {
   for (const r of repos) {
     const dates = await repoCommits(user, r.name);
     for (const d of dates) daily.set(d, (daily.get(d) || 0) + 1);
-    if (dates.length) console.log(`  ${r.name}: ${dates.length}`);
+    // Actions logs on a public repo are public — never print private repo names
+    if (dates.length) console.log(`  ${r.private ? '(private repo)' : r.name}: ${dates.length}`);
     total += dates.length;
   }
 
