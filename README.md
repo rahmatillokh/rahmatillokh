@@ -5,7 +5,7 @@
 
 <!-- ═══════════════════════════ TYPING ═══════════════════════════ -->
 <div align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=26&duration=2600&pause=900&color=36BCF7&center=true&vCenter=true&width=680&height=60&lines=Hi+there+%F0%9F%91%8B+I'm+Rahmatillo;Full-Stack+Developer+from+Uzbekistan;React+%2B+Next.js+on+the+front%2C+Node+on+the+back;I+turn+coffee+into+clean+code;Always+shipping%2C+always+learning" alt="typing" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&duration=2600&pause=900&color=36BCF7&center=true&vCenter=true&width=820&height=70&lines=Hi+there+%F0%9F%91%8B+I'm+Rahmatillo;Full-Stack+Developer+from+Uzbekistan;React+%26+Next.js+on+the+front-end;Node.js+%26+MongoDB+on+the+back-end;Always+shipping%2C+always+learning" alt="typing" />
 </div>
 
 <!-- ═══════════════════════════ SOCIAL ═══════════════════════════ -->
