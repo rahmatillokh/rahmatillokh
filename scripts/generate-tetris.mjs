@@ -1,16 +1,21 @@
 #!/usr/bin/env node
 /**
- * Contribution Tetris
- * -------------------
- * Reads a GitHub user's public contribution calendar, tiles the filled cells
- * with tetromino pieces, and renders an animated SVG in which the pieces fall
- * from above and stack up to rebuild the calendar.
+ * Activity Tetris
+ * ---------------
+ * Builds a daily activity map from real commit activity across the user's own
+ * repositories (GitHub's /stats/commit_activity, which counts every commit in
+ * the repo regardless of whether the commit email is linked to the account),
+ * tiles the active days with tetromino pieces, and renders an animated SVG in
+ * which the pieces fall from above and stack up to rebuild the year.
  *
- * Usage: node scripts/generate-tetris.mjs <github-username> [outDir] [--year=2024]
- *        node scripts/generate-tetris.mjs <github-username> [outDir] [--from=…] [--to=…]
+ * This deliberately does NOT use the profile contribution calendar — that one
+ * only counts commits whose author email is verified on the account.
  *
- * With no date flags it uses the rolling last-12-months calendar, same as the
- * graph on your profile page.
+ * Usage:
+ *   node scripts/generate-tetris.mjs <github-username> [outDir]
+ *   node scripts/generate-tetris.mjs <user> assets --exclude=some-repo,other
+ *
+ * Set GITHUB_TOKEN to lift the 60 req/hour unauthenticated rate limit.
  */
 
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -25,14 +30,13 @@ for (const arg of process.argv.slice(2)) {
 
 const login = positional[0] || process.env.GH_USER;
 const outDir = positional[1] || 'assets';
-
-if (flags.year) {
-  flags.from = `${flags.year}-01-01`;
-  flags.to = `${flags.year}-12-31`;
-}
+const TOKEN = process.env.GITHUB_TOKEN || '';
+const EXCLUDE = new Set(
+  (flags.exclude || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean)
+);
 
 if (!login) {
-  console.error('usage: node scripts/generate-tetris.mjs <github-username> [outDir] [--year=YYYY]');
+  console.error('usage: node scripts/generate-tetris.mjs <github-username> [outDir] [--exclude=a,b]');
   process.exit(1);
 }
 
@@ -81,33 +85,96 @@ const shuffle = (arr) => {
   return a;
 };
 
-/* ── fetch + parse the public contribution calendar ─────────────────────── */
-async function fetchCalendar(user) {
-  const qs = new URLSearchParams();
-  if (flags.from) qs.set('from', flags.from);
-  if (flags.to) qs.set('to', flags.to);
-  const url =
-    `https://github.com/users/${encodeURIComponent(user)}/contributions` +
-    (qs.toString() ? `?${qs}` : '');
-  const res = await fetch(url, {
+/* ── real commit activity across the user's own repositories ────────────── */
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function api(path) {
+  return fetch(`https://api.github.com${path}`, {
     headers: {
-      'User-Agent': 'contribution-tetris',
-      Accept: 'text/html',
-      'X-Requested-With': 'XMLHttpRequest',
+      'User-Agent': 'activity-tetris',
+      Accept: 'application/vnd.github+json',
+      ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}),
     },
   });
-  if (!res.ok) throw new Error(`GitHub returned ${res.status} for ${url}`);
-  const html = await res.text();
+}
+
+async function listRepos(user) {
+  const all = [];
+  for (let page = 1; page <= 5; page++) {
+    const res = await api(`/users/${encodeURIComponent(user)}/repos?per_page=100&page=${page}`);
+    if (!res.ok) throw new Error(`listing repos failed: HTTP ${res.status}`);
+    const batch = await res.json();
+    all.push(...batch);
+    if (batch.length < 100) break;
+  }
+  return all.filter((r) => !r.fork && !r.archived && !EXCLUDE.has(r.name.toLowerCase()));
+}
+
+// /stats/commit_activity → 52 weeks × 7 daily commit counts, per repo
+async function repoActivity(user, repo) {
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const res = await api(`/repos/${user}/${repo}/stats/commit_activity`);
+    if (res.status === 202) {
+      // GitHub is computing the stats — back off and ask again
+      await sleep(2000 + attempt * 1000);
+      continue;
+    }
+    if (res.status === 204) return []; // empty repo
+    if (!res.ok) {
+      console.warn(`  ${repo}: HTTP ${res.status}`);
+      return [];
+    }
+    const weeks = await res.json();
+    return Array.isArray(weeks) ? weeks : [];
+  }
+  console.warn(`  ${repo}: stats still computing, skipped`);
+  return [];
+}
+
+async function fetchActivity(user) {
+  const repos = await listRepos(user);
+  console.log(`scanning ${repos.length} repositories…`);
+
+  const daily = new Map();
+  let totalCommits = 0;
+
+  for (const r of repos) {
+    const weeks = await repoActivity(user, r.name);
+    let repoTotal = 0;
+    for (const w of weeks) {
+      if (!Array.isArray(w?.days)) continue;
+      w.days.forEach((count, i) => {
+        if (!count) return;
+        const day = new Date((w.week + i * 86400) * 1000).toISOString().slice(0, 10);
+        daily.set(day, (daily.get(day) || 0) + count);
+        repoTotal += count;
+      });
+    }
+    if (repoTotal) console.log(`  ${r.name}: ${repoTotal}`);
+    totalCommits += repoTotal;
+  }
+
+  console.log(`${totalCommits} commits across ${daily.size} active days`);
+  return daily;
+}
+
+// daily commit counts → one cell per day, level 0-4 by quartile
+function toCells(daily) {
+  const counts = [...daily.values()].filter((c) => c > 0).sort((a, b) => a - b);
+  const at = (p) => counts[Math.min(counts.length - 1, Math.floor(counts.length * p))] || 1;
+  const [t1, t2, t3] = [at(0.25), at(0.5), at(0.75)];
+  const levelOf = (c) => (c <= 0 ? 0 : c <= t1 ? 1 : c <= t2 ? 2 : c <= t3 ? 3 : 4);
+
+  const end = new Date();
+  end.setUTCHours(0, 0, 0, 0);
+  const start = new Date(end);
+  start.setUTCDate(start.getUTCDate() - 364);
+  start.setUTCDate(start.getUTCDate() - start.getUTCDay()); // back up to Sunday
 
   const cells = [];
-  for (const m of html.matchAll(/<td\b[^>]*>/g)) {
-    const tag = m[0];
-    const date = /data-date="([^"]+)"/.exec(tag);
-    const level = /data-level="([^"]+)"/.exec(tag);
-    if (date && level) cells.push({ date: date[1], level: Number(level[1]) || 0 });
-  }
-  if (!cells.length) {
-    throw new Error('could not parse any calendar cells — GitHub markup may have changed');
+  for (const d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+    const day = d.toISOString().slice(0, 10);
+    cells.push({ date: day, level: levelOf(daily.get(day) || 0) });
   }
   return cells;
 }
@@ -339,31 +406,28 @@ function render({ pieces, weeks, start, theme }) {
   });
 
   body.push(
-    `<text class="cap" x="${PAD_X - 5}" y="${H - 10}">contribution tetris · @${login}</text>`,
+    `<text class="cap" x="${PAD_X - 5}" y="${H - 10}">activity tetris · @${login}</text>`,
     `<text class="cap" x="${W - PAD_X + 5}" y="${H - 10}" text-anchor="end">${N} pieces</text>`
   );
 
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" ` +
     `viewBox="0 0 ${W} ${H}" role="img" ` +
-    `aria-label="Animated tetris built from @${login}'s GitHub contribution graph">` +
+    `aria-label="Animated tetris built from @${login}'s GitHub commit activity">` +
     `<style>${css.join('')}</style>${body.join('')}</svg>`
   );
 }
 
 /* ── main ───────────────────────────────────────────────────────────────── */
-const cells = await fetchCalendar(login);
+const daily = await fetchActivity(login);
+const cells = toCells(daily);
 const { grid, weeks, start } = buildGrid(cells);
 const pieces = tile(grid, weeks);
 
 const filled = cells.filter((c) => c.level > 0).length;
-if (filled < cells.length * 0.05) {
-  console.warn(
-    `warning: only ${filled}/${cells.length} days have public contributions, so the ` +
-      `animation will look sparse.\n` +
-      `  · add every email you commit with at github.com/settings/emails\n` +
-      `  · enable "Include private contributions on my profile" at github.com/settings/profile`
-  );
+if (!filled) {
+  console.error('error: no commit activity found — nothing to render');
+  process.exit(1);
 }
 
 mkdirSync(outDir, { recursive: true });
@@ -373,4 +437,4 @@ for (const theme of ['light', 'dark']) {
   writeFileSync(file, svg);
   console.log(`${file}  ${(svg.length / 1024).toFixed(1)} KB`);
 }
-console.log(`${pieces.length} pieces from ${weeks} weeks of contributions`);
+console.log(`${pieces.length} pieces from ${weeks} weeks of activity`);

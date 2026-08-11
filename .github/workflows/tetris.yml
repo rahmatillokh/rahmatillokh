@@ -5,11 +5,6 @@ on:
     # every day at 03:00 UTC (08:00 Tashkent)
     - cron: "0 3 * * *"
   workflow_dispatch:
-    inputs:
-      year:
-        description: "Render a specific year instead of the last 12 months (e.g. 2023)"
-        required: false
-        default: ""
   push:
     branches:
       - main
@@ -29,13 +24,14 @@ jobs:
 
       - name: Generate tetris SVGs
         env:
-          YEAR: ${{ github.event.inputs.year }}
-        run: |
-          if [ -n "$YEAR" ]; then
-            node scripts/generate-tetris.mjs "${{ github.repository_owner }}" assets --year="$YEAR"
-          else
-            node scripts/generate-tetris.mjs "${{ github.repository_owner }}" assets
-          fi
+          # lifts the API rate limit from 60 to 1000 requests/hour
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # exclude this repo: the daily bot commit below would otherwise show up
+        # as fake activity on every single day
+        run: >
+          node scripts/generate-tetris.mjs
+          "${{ github.repository_owner }}" assets
+          --exclude="${{ github.event.repository.name }}"
 
       - name: Commit if changed
         run: |

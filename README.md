@@ -11,7 +11,7 @@
 <!-- ═══════════════════════════ SOCIAL ═══════════════════════════ -->
 <div align="center">
   <a href="https://t.me/rahmatillo_dev"><img src="https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="telegram" /></a>
-  <a href="https://t.me/rahmatillokh_web"><img src="https://img.shields.io/badge/Kanal-229ED9?style=for-the-badge&logo=telegram&logoColor=white" alt="telegram channel" /></a>
+  <a href="https://t.me/rahmatillokh_web"><img src="https://img.shields.io/badge/Channel-229ED9?style=for-the-badge&logo=telegram&logoColor=white" alt="telegram channel" /></a>
   <a href="https://www.youtube.com/@rahmatillokh"><img src="https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="youtube" /></a>
   <a href="https://www.linkedin.com/in/rahmatillokh/"><img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="linkedin" /></a>
   <a href="https://instagram.com/rahmatillo.dev"><img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="instagram" /></a>
@@ -46,12 +46,6 @@ $ uptime
 > coding since 2023 · still curious
 ```
 
-- 🔭 Hozirda **full-stack web ilovalar** ustida ishlayapman
-- 🌱 O'rganyapman: **Docker**, **PostgreSQL**, **System Design**
-- 👯 Hamkorlikka ochiqman: **Open Source** loyihalar
-- 💬 Menga savol bering: **React, Next.js, Node.js, MongoDB**
-- ⚡ Fun fact: **Bir chashka choy = 100 qator kod**
-
 <br clear="right" />
 
 <!-- ═══════════════════════════ STACK ═══════════════════════════ -->
@@ -80,51 +74,15 @@ $ uptime
   </tr>
 </table>
 
-<!-- ═══════════════════════════ STATS ═══════════════════════════ -->
-## 📊 GitHub Stats
-
-<div align="center">
-  <img src="https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=rahmatillokh&theme=tokyonight" alt="profile summary" width="100%" />
-</div>
-
-<div align="center">
-  <img height="180" src="https://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=rahmatillokh&theme=tokyonight" alt="repos per language" />
-  <img height="180" src="https://github-profile-summary-cards.vercel.app/api/cards/most-commit-language?username=rahmatillokh&theme=tokyonight" alt="most used language" />
-</div>
-
-<div align="center">
-  <img height="180" src="https://github-profile-summary-cards.vercel.app/api/cards/stats?username=rahmatillokh&theme=tokyonight" alt="stats" />
-  <img height="180" src="https://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=rahmatillokh&theme=tokyonight&utcOffset=5" alt="productive time" />
-</div>
-
-<div align="center">
-  <img src="https://streak-stats.demolab.com?user=rahmatillokh&theme=tokyonight&hide_border=true&background=00000000&ring=36BCF7&fire=FF7A00&currStreakLabel=36BCF7" alt="streak" />
-</div>
-
 <!-- ═══════════════════════════ TETRIS ═══════════════════════════ -->
-## 🎮 Contribution Tetris
+## 🎮 Activity Tetris
 
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./assets/tetris-dark.svg" />
     <source media="(prefers-color-scheme: light)" srcset="./assets/tetris.svg" />
-    <img src="./assets/tetris.svg" alt="Contribution tetris" width="100%" />
+    <img src="./assets/tetris.svg" alt="Activity tetris" width="100%" />
   </picture>
-</div>
-
-<div align="center">
-  <sub>🧱 Har kuni yangilanadi — commitlarim tetromino bo'laklariga bo'linib, grafikni qaytadan yig'adi</sub>
-</div>
-
-<!-- ═══════════════════════════ QUOTE ═══════════════════════════ -->
-<div align="center">
-  <img src="https://quotes-github-readme.vercel.app/api?type=horizontal&theme=tokyonight" alt="quote" />
-</div>
-
-<br />
-
-<div align="center">
-  <b>⭐ Agar loyihalarim yoqsa, star bosishni unutmang!</b>
 </div>
 
 <!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
