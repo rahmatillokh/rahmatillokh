@@ -84,26 +84,21 @@ $ uptime
 ## 📊 GitHub Stats
 
 <div align="center">
-  <img height="170" src="https://github-readme-stats.vercel.app/api?username=rahmatillokh&show_icons=true&theme=tokyonight&hide_border=true&bg_color=00000000&include_all_commits=true&count_private=true&icon_color=36BCF7&title_color=36BCF7" alt="stats" />
-  <img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=rahmatillokh&layout=compact&theme=tokyonight&hide_border=true&bg_color=00000000&langs_count=8&title_color=36BCF7" alt="top languages" />
+  <img src="https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=rahmatillokh&theme=tokyonight" alt="profile summary" width="100%" />
+</div>
+
+<div align="center">
+  <img height="180" src="https://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=rahmatillokh&theme=tokyonight" alt="repos per language" />
+  <img height="180" src="https://github-profile-summary-cards.vercel.app/api/cards/most-commit-language?username=rahmatillokh&theme=tokyonight" alt="most used language" />
+</div>
+
+<div align="center">
+  <img height="180" src="https://github-profile-summary-cards.vercel.app/api/cards/stats?username=rahmatillokh&theme=tokyonight" alt="stats" />
+  <img height="180" src="https://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=rahmatillokh&theme=tokyonight&utcOffset=5" alt="productive time" />
 </div>
 
 <div align="center">
   <img src="https://streak-stats.demolab.com?user=rahmatillokh&theme=tokyonight&hide_border=true&background=00000000&ring=36BCF7&fire=FF7A00&currStreakLabel=36BCF7" alt="streak" />
-</div>
-
-<!-- ═══════════════════════════ TROPHY ═══════════════════════════ -->
-## 🏆 Trophies
-
-<div align="center">
-  <img src="https://github-profile-trophy.vercel.app/?username=rahmatillokh&theme=tokyonight&no-frame=true&no-bg=true&column=7&margin-w=8&margin-h=8" alt="trophies" />
-</div>
-
-<!-- ═══════════════════════════ GRAPH ═══════════════════════════ -->
-## 📈 Contribution Graph
-
-<div align="center">
-  <img src="https://github-readme-activity-graph.vercel.app/graph?username=rahmatillokh&theme=tokyo-night&hide_border=true&bg_color=00000000&color=36BCF7&line=36BCF7&point=FFFFFF&area=true&area_color=36BCF7" alt="activity graph" width="100%" />
 </div>
 
 <!-- ═══════════════════════════ TETRIS ═══════════════════════════ -->
@@ -125,21 +120,18 @@ $ uptime
 ## 🚀 Featured Projects
 
 <div align="center">
-  <a href="https://github.com/rahmatillokh/youtube-downloader-app">
-    <img src="https://github-readme-stats.vercel.app/api/pin/?username=rahmatillokh&repo=youtube-downloader-app&theme=tokyonight&hide_border=true&bg_color=00000000&title_color=36BCF7&icon_color=36BCF7" alt="youtube-downloader-app" />
-  </a>
-  <a href="https://github.com/rahmatillokh/messenger-clone">
-    <img src="https://github-readme-stats.vercel.app/api/pin/?username=rahmatillokh&repo=messenger-clone&theme=tokyonight&hide_border=true&bg_color=00000000&title_color=36BCF7&icon_color=36BCF7" alt="messenger-clone" />
-  </a>
+
+| Loyiha | Tavsif | Stack |
+| :--- | :--- | :--- |
+| **[youtube-downloader-app](https://github.com/rahmatillokh/youtube-downloader-app)**<br/>[![stars](https://img.shields.io/github/stars/rahmatillokh/youtube-downloader-app?style=flat-square&color=FFD700&label=%E2%98%85)](https://github.com/rahmatillokh/youtube-downloader-app/stargazers) | YouTube'dan audio yoki video yuklab oluvchi ilova | ![](https://img.shields.io/badge/JS-323330?style=flat-square&logo=javascript&logoColor=F7DF1E) ![](https://img.shields.io/badge/Node-6DA55F?style=flat-square&logo=node.js&logoColor=white) |
+| **[messenger-clone](https://github.com/rahmatillokh/messenger-clone)**<br/>[![stars](https://img.shields.io/github/stars/rahmatillokh/messenger-clone?style=flat-square&color=FFD700&label=%E2%98%85)](https://github.com/rahmatillokh/messenger-clone/stargazers) | Messenger ilovasining real-time kloni | ![](https://img.shields.io/badge/TS-007ACC?style=flat-square&logo=typescript&logoColor=white) ![](https://img.shields.io/badge/Next-000?style=flat-square&logo=next.js&logoColor=white) |
+| **[telegram-web-app](https://github.com/rahmatillokh/telegram-web-app)**<br/>[![stars](https://img.shields.io/github/stars/rahmatillokh/telegram-web-app?style=flat-square&color=FFD700&label=%E2%98%85)](https://github.com/rahmatillokh/telegram-web-app/stargazers) | Telegram bot bilan ishlaydigan Web App | ![](https://img.shields.io/badge/JS-323330?style=flat-square&logo=javascript&logoColor=F7DF1E) ![](https://img.shields.io/badge/Telegram-26A5E4?style=flat-square&logo=telegram&logoColor=white) |
+| **[instagram-downloader-bot](https://github.com/rahmatillokh/instagram-downloader-bot)**<br/>[![stars](https://img.shields.io/github/stars/rahmatillokh/instagram-downloader-bot?style=flat-square&color=FFD700&label=%E2%98%85)](https://github.com/rahmatillokh/instagram-downloader-bot/stargazers) | Instagram'dan video yuklab beruvchi bot | ![](https://img.shields.io/badge/JS-323330?style=flat-square&logo=javascript&logoColor=F7DF1E) ![](https://img.shields.io/badge/Node-6DA55F?style=flat-square&logo=node.js&logoColor=white) |
+
 </div>
 
 <div align="center">
-  <a href="https://github.com/rahmatillokh/telegram-web-app">
-    <img src="https://github-readme-stats.vercel.app/api/pin/?username=rahmatillokh&repo=telegram-web-app&theme=tokyonight&hide_border=true&bg_color=00000000&title_color=36BCF7&icon_color=36BCF7" alt="telegram-web-app" />
-  </a>
-  <a href="https://github.com/rahmatillokh/instagram-downloader-bot">
-    <img src="https://github-readme-stats.vercel.app/api/pin/?username=rahmatillokh&repo=instagram-downloader-bot&theme=tokyonight&hide_border=true&bg_color=00000000&title_color=36BCF7&icon_color=36BCF7" alt="instagram-downloader-bot" />
-  </a>
+  <a href="https://github.com/rahmatillokh?tab=repositories"><b>→ Barcha repolar</b></a>
 </div>
 
 <!-- ═══════════════════════════ QUOTE ═══════════════════════════ -->
