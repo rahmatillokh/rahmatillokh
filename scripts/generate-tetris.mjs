@@ -2,11 +2,11 @@
 /**
  * Activity Tetris
  * ---------------
- * Builds a daily activity map from real commit activity across the user's own
- * repositories (GitHub's /stats/commit_activity, which counts every commit in
- * the repo regardless of whether the commit email is linked to the account),
- * tiles the active days with tetromino pieces, and renders an animated SVG in
- * which the pieces fall from above and stack up to rebuild the year.
+ * Builds a daily activity map by walking the commit history of every repo the
+ * user owns, tiles the active days with tetromino pieces, and renders an
+ * animated SVG in which the pieces fall from above and stack up to rebuild the
+ * year. If the last 12 months are too quiet it renders the busiest 53-week
+ * stretch instead and names the period in the caption.
  *
  * This deliberately does NOT use the profile contribution calendar — that one
  * only counts commits whose author email is verified on the account.
@@ -15,7 +15,9 @@
  *   node scripts/generate-tetris.mjs <github-username> [outDir]
  *   node scripts/generate-tetris.mjs <user> assets --exclude=some-repo,other
  *
- * Set GITHUB_TOKEN to lift the 60 req/hour unauthenticated rate limit.
+ * GITHUB_TOKEN lifts the 60 req/hour unauthenticated rate limit. If it holds a
+ * personal access token with the `repo` scope, private repositories are scanned
+ * too; the token Actions injects by default only reaches public ones.
  */
 
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -98,16 +100,45 @@ async function api(path) {
   });
 }
 
-async function listRepos(user) {
+async function paginate(pathFor) {
   const all = [];
   for (let page = 1; page <= 5; page++) {
-    const res = await api(`/users/${encodeURIComponent(user)}/repos?per_page=100&page=${page}`);
-    if (!res.ok) throw new Error(`listing repos failed: HTTP ${res.status}`);
+    const res = await api(pathFor(page));
+    if (!res.ok) return { ok: false, status: res.status, all };
     const batch = await res.json();
+    if (!Array.isArray(batch)) return { ok: false, status: 500, all };
     all.push(...batch);
     if (batch.length < 100) break;
   }
-  return all.filter((r) => !r.fork && !r.archived && !EXCLUDE.has(r.name.toLowerCase()));
+  return { ok: true, all };
+}
+
+async function listRepos(user) {
+  let repos = null;
+
+  // A personal access token can see private repositories; the token Actions
+  // injects by default cannot, and /user/repos rejects it outright.
+  if (TOKEN) {
+    const owned = await paginate(
+      (p) => `/user/repos?per_page=100&page=${p}&affiliation=owner&visibility=all`
+    );
+    if (owned.ok) {
+      repos = owned.all.filter((r) => r.owner?.login?.toLowerCase() === user.toLowerCase());
+    }
+  }
+
+  // an empty result means the token is not this user's — fall back rather than
+  // silently rendering nothing
+  if (!repos || !repos.length) {
+    const pub = await paginate((p) => `/users/${encodeURIComponent(user)}/repos?per_page=100&page=${p}`);
+    if (!pub.ok) throw new Error(`listing repos failed: HTTP ${pub.status}`);
+    repos = pub.all;
+  }
+
+  const kept = repos.filter((r) => !r.fork && !r.archived && !EXCLUDE.has(r.name.toLowerCase()));
+  const priv = kept.filter((r) => r.private).length;
+  console.log(`scanning ${kept.length} repositories (${priv} private)…`);
+  return kept;
 }
 
 // identities that count as "mine" when a repo has many committers.
@@ -188,7 +219,6 @@ async function repoCommits(user, repo) {
 async function fetchActivity(user) {
   await loadIdentities(user);
   const repos = await listRepos(user);
-  console.log(`scanning ${repos.length} repositories…`);
 
   const daily = new Map();
   let total = 0;

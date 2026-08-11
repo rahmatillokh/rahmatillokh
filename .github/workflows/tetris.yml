@@ -24,8 +24,10 @@ jobs:
 
       - name: Generate tetris SVGs
         env:
-          # lifts the API rate limit from 60 to 1000 requests/hour
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GH_PAT (a personal access token with the `repo` scope) also brings
+          # private repositories into scope. Without it the default Actions
+          # token is used, which only reaches public ones.
+          GITHUB_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
         # the profile repo stays in scope — the nightly bot commit is dropped by
         # author, so real README work here still counts as activity
         run: node scripts/generate-tetris.mjs "${{ github.repository_owner }}" assets
